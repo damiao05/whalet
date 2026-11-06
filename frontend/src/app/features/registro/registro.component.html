@@ -1,0 +1,65 @@
+<main class="login">
+    <h1>Criar conta</h1>
+    <p class="sub">Preencha os dados para começar</p>
+
+    <form [formGroup]="form" (ngSubmit)="cadastrar()">
+        <label>
+            Nome
+            <input type="text" formControlName="primeiroNome" autocomplete="given-name">
+        </label>
+        @if (form.controls.primeiroNome.touched && form.controls.primeiroNome.invalid) {
+            <small class="erro">Informe seu nome</small>
+        }
+
+        <label>
+            Sobrenome
+            <input type="text" formControlName="sobrenome" autocomplete="family-name">
+        </label>
+        @if (form.controls.sobrenome.touched && form.controls.sobrenome.invalid) {
+            <small class="erro">Informe seu sobrenome</small>
+        }
+
+        <label>
+            E-mail
+            <input type="email" formControlName="email" autocomplete="email">
+        </label>
+        @if (form.controls.email.touched && form.controls.email.invalid) {
+            <small class="erro">Informe um e-mail válido</small>
+        }
+
+        <label>
+            Senha
+            <input type="password" formControlName="senha" autocomplete="new-password">
+        </label>
+        @if (form.controls.senha.touched && form.controls.senha.invalid) {
+            <small class="erro">A senha deve ter entre 6 e 72 caracteres</small>
+        }
+
+        <label>
+            Confirmar senha
+            <input type="password" formControlName="confirmarSenha" autocomplete="new-password">
+        </label>
+        @if (form.controls.confirmarSenha.touched && form.hasError('senhasDiferentes')) {
+        <small class="erro">As senhas não conferem</small>
+        }
+
+        @if (erro()) {
+            <p class="erro">{{ erro() }}</p>
+        }
+
+        <button type="submit" [disabled]="carregando()">
+            {{ carregando() ? 'Criando conta...' : 'Criar conta' }}
+        </button>
+    </form>
+
+    <div class="divisor"><span>ou</span></div>
+
+    <app-google-button
+        texto="signup_with"
+        (sucesso)="irParaDashboard()"
+        (falhou)="erro.set('Falha ao entrar com o Google')"
+    />
+
+
+    <p class="troca">Já tem conta? <a routerLink="/login">Entrar</a></p>
+</main>

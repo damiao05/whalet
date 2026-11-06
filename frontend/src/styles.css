@@ -1,0 +1,112 @@
+:root {
+  color-scheme: light;
+  --bg: #F4F8FB;
+  --surface: #FFFFFF;
+  --text: #0B2239;
+  --text-muted: #5B7083;
+  --border: #D6E2EC;
+  --primary: #1263B5;
+  --on-primary: #FFFFFF;
+  --accent: #12A594;
+  --success: #15803D;
+  --danger: #C93035;
+
+  --radius: 12px;
+  --font: 'Sora', system-ui, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    color-scheme: dark;
+    --bg: #07131F;
+    --surface: #0F2133;
+    --text: #E6F0F8;
+    --text-muted: #8FA6BA;
+    --border: #1D3449;
+    --primary: #4DA3F0;
+    --on-primary: #04121F;
+    --accent: #2DD4BF;
+    --success: #3DD68C;
+    --danger: #FF7A7A;
+  }
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: #07131F;
+  --surface: #0F2133;
+  --text: #E6F0F8;
+  --text-muted: #8FA6BA;
+  --border: #1D3449;
+  --primary: #4DA3F0;
+  --on-primary: #04121F;
+  --accent: #2DD4BF;
+  --success: #3DD68C;
+  --danger: #FF7A7A;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+}
+
+h1 { margin: 0; }
+a { color: var(--primary); }
+
+label { display: flex; flex-direction: column; gap: .25rem; font-size: .9rem; }
+
+input {
+  width: 100%;
+  padding: .7rem .8rem;
+  font: inherit;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+input:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 1px;
+  border-color: var(--primary);
+}
+
+button[type='submit'] {
+  min-height: 44px;
+  padding: 0 1.5rem;
+  border: 0;
+  border-radius: var(--radius);
+  background: var(--primary);
+  color: var(--on-primary);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+button[type='submit']:hover:not(:disabled) { filter: brightness(1.08); }
+button:disabled { opacity: .6; cursor: not-allowed; }
+
+.login {
+  max-width: 380px;
+  margin: 10vh auto;
+  padding: 2rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+}
+.login form { display: flex; flex-direction: column; gap: .75rem; }
+.login .sub { margin: 0 0 1rem; color: var(--text-muted); }
+
+.erro { color: var(--danger); margin: 0; font-size: .85rem; }
+
+.divisor {
+  display: flex; align-items: center; gap: .75rem;
+  color: var(--text-muted); font-size: .85rem;
+}
+.divisor::before, .divisor::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+.troca { text-align: center; font-size: .9rem; margin: 0; }
+
+.tema { position: fixed; top: 16px; right: 16px; z-index: 10; }
