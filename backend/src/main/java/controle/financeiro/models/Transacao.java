@@ -51,4 +51,8 @@ public class Transacao {
 
     @Column(name = "data_criacao")
     private LocalDateTime dataCriacao = LocalDateTime.now();
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "categoria_id")
+    private Categoria categoria;
 }

@@ -13,5 +13,6 @@ public record TransacaoRequestDTO(
         @NotNull LocalDate data,
         UUID contaId,
         UUID cartaoId,
+        UUID categoriaId,
         String metadados
 ) {}

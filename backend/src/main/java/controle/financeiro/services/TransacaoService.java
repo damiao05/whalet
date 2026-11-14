@@ -6,7 +6,9 @@ import controle.financeiro.models.CartaoCredito;
 import controle.financeiro.models.Conta;
 import controle.financeiro.models.TipoTransacao;
 import controle.financeiro.models.Transacao;
+import controle.financeiro.models.Categoria;
 import controle.financeiro.repositories.CartaoCreditoRepository;
+import controle.financeiro.repositories.CategoriaRepository;
 import controle.financeiro.repositories.ContaRepository;
 import controle.financeiro.repositories.TransacaoRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +29,7 @@ public class TransacaoService {
     private final ContaRepository contaRepository;
     private final CartaoCreditoRepository cartaoRepository;
     private final UsuarioLogado usuarioLogado;
+    private final CategoriaRepository categoriaRepository;
 
     @Transactional(readOnly = true)
     public List<TransacaoResponseDTO> listar(YearMonth mes) {
@@ -61,7 +64,6 @@ public class TransacaoService {
     }
 
     private void aplicar(Transacao t, TransacaoRequestDTO dto) {
-        // Exatamente uma origem: conta OU cartão
         if ((dto.contaId() == null) == (dto.cartaoId() == null)) {
             throw erro("Informe a conta ou o cartão (apenas um dos dois)");
         }
@@ -69,6 +71,7 @@ public class TransacaoService {
         UUID usuarioId = t.getUsuario().getId();
         Conta conta = null;
         CartaoCredito cartao = null;
+        Categoria categoria = null;
 
         if (dto.contaId() != null) {
             conta = contaRepository.findByIdAndUsuarioId(dto.contaId(), usuarioId)
@@ -83,12 +86,22 @@ public class TransacaoService {
             }
         }
 
+        if (dto.categoriaId() != null) {
+            categoria = categoriaRepository.findByIdAndUsuarioId(dto.categoriaId(), usuarioId)
+                    .filter(Categoria::isAtiva)
+                    .orElseThrow(() -> erro("Categoria inválida"));
+            if (categoria.getTipo() != dto.tipo()) {
+                throw erro("A categoria não é do mesmo tipo de transação");
+            }
+        }
+
         t.setConta(conta);
         t.setCartao(cartao);
         t.setDescricao(dto.descricao().trim());
         t.setValor(dto.valor());
         t.setTipo(dto.tipo());
         t.setDataTransacao(dto.data());
+        t.setCategoria(categoria);
         t.setMetadados(dto.metadados());
     }
 
