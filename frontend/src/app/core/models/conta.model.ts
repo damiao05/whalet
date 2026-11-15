@@ -1,10 +1,12 @@
 export type TipoConta = 'CORRENTE' | 'POUPANCA' | 'DINHEIRO' | 'INVESTIMENTO';
 
 export interface Conta {
-    id          : string,
-    nome        : string,
-    tipo        : TipoConta,
-    instituicao : string | null,
+    id          : string;
+    nome        : string;
+    tipo        : TipoConta;
+    instituicao : string | null;
+    cor         : string | null;
+    icone       : string | null;
     saldoInicial: number;
     saldoAtual  : number;
     ativa       : boolean;
@@ -12,8 +14,10 @@ export interface Conta {
 
 export interface ContaRequest {
     nome        : string;
-    tipo        : TipoConta,
+    tipo        : TipoConta;
     instituicao : string | null;
+    cor         : string | null;
+    icone       : string | null;
     saldoInicial: number;
 }
 

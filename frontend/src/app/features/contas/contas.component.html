@@ -24,18 +24,18 @@
 } @else {
   <section class="grade">
     @for (c of contas(); track c.id) {
-      <article class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; gap: .5rem">
-          <h2 style="margin: 0; font-size: 1.1rem">{{ c.nome }}</h2>
-          <span class="badge">{{ rotulo(c.tipo) }}</span>
+      <article class="card conta" [style.--cor-conta]="c.cor || 'var(--primary)'">
+        <div class="topo">
+          <app-avatar [nome]="c.instituicao || c.nome" [cor]="c.cor" />
+          <div class="titulo">
+            <h2>{{ c.nome }}</h2>
+            <p class="subtitulo">{{ subtitulo(c) }}</p>
+          </div>
         </div>
-        @if (c.instituicao) {
-          <p class="muted" style="margin: .25rem 0 0">{{ c.instituicao }}</p>
-        }
-        <p class="money" style="font-size: 1.6rem; font-weight: 700; margin: 1rem 0" [class.negativo]="c.saldoAtual < 0">
-          {{ c.saldoAtual | currency: 'BRL' }}
-        </p>
-        <div style="display: flex; gap: .5rem">
+
+        <p class="saldo money" [class.negativo]="c.saldoAtual < 0">{{ c.saldoAtual | currency: 'BRL' }}</p>
+
+        <div class="acoes">
           <button type="button" class="btn btn-ghost" (click)="editar(c)">Editar</button>
           <button type="button" class="btn btn-ghost btn-perigo" (click)="arquivar(c)">Arquivar</button>
         </div>
@@ -48,9 +48,15 @@
   <form [formGroup]="form" (ngSubmit)="salvar()">
     <h2>{{ editando() ? 'Editar conta' : 'Nova conta' }}</h2>
 
+    <div class="previa">
+      <app-avatar [nome]="form.controls.instituicao.value || form.controls.nome.value || 'Conta'"
+                  [cor]="form.controls.cor.value || null" [tamanho]="48" />
+      <span class="muted">Assim a conta aparecerá na lista</span>
+    </div>
+
     <label>
       Nome
-      <input type="text" formControlName="nome" placeholder="Ex.: Nubank" />
+      <input type="text" formControlName="nome" placeholder="Ex.: Conta principal" />
     </label>
     @if (form.controls.nome.touched && form.controls.nome.invalid) {
       <small class="erro">Informe o nome da conta</small>
@@ -65,18 +71,34 @@
       </select>
     </label>
 
-    <label>
-      Instituição (opcional)
-      <input type="text" formControlName="instituicao" placeholder="Ex.: Nubank, Itaú..." />
-    </label>
+    <fieldset class="grupo">
+      <legend>Instituição</legend>
+      <div class="chips">
+        @for (i of instituicoes; track i.chave) {
+          <button type="button" class="chip" [class.ativo]="form.controls.icone.value === i.chave"
+                  (click)="escolherInstituicao(i)">
+            <span class="ponto" [style.background]="i.cor"></span>{{ i.nome }}
+          </button>
+        }
+      </div>
+      <input type="text" formControlName="instituicao" (input)="aoDigitarInstituicao()"
+             placeholder="Ou digite outra instituição (opcional)" aria-label="Outra instituição" />
+    </fieldset>
+
+    <fieldset class="grupo">
+      <legend>Cor</legend>
+      <div class="cores">
+        @for (c of cores; track c) {
+          <button type="button" class="cor" [style.background]="c" [class.ativa]="form.controls.cor.value === c"
+                  (click)="escolherCor(c)" [attr.aria-label]="'Cor ' + c"></button>
+        }
+      </div>
+    </fieldset>
 
     <label>
       Saldo inicial
-      <input type="number" step="0.01" formControlName="saldoInicial" />
+      <app-money-input formControlName="saldoInicial" [permitirNegativo]="true" />
     </label>
-    @if (form.controls.saldoInicial.touched && form.controls.saldoInicial.invalid) {
-      <small class="erro">Informe o saldo inicial (pode ser 0)</small>
-    }
 
     @if (erroForm()) {
       <p class="erro">{{ erroForm() }}</p>

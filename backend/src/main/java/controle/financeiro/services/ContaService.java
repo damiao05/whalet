@@ -65,6 +65,8 @@ public class ContaService {
         conta.setNome(dto.nome().trim());
         conta.setTipo(dto.tipo());
         conta.setInstituicao(dto.instituicao());
+        conta.setCor(dto.cor());
+        conta.setIcon(dto.icon());
         conta.setSaldoInicial(dto.saldoInicial());
     }
 }

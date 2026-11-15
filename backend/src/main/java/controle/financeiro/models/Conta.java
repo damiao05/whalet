@@ -30,6 +30,12 @@ public class Conta {
     @Column(length = 100)
     private String instituicao;
 
+    @Column(length = 7)
+    private String cor;
+
+    @Column(length = 30)
+    private String icon;
+
     @Column(name = "saldo_inicial", nullable = false, precision = 15, scale = 2)
     private BigDecimal saldoInicial = BigDecimal.ZERO;
 
