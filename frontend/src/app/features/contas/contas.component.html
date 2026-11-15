@@ -1,0 +1,92 @@
+<header class="pagina-topo">
+  <div>
+    <h1>Contas</h1>
+    <p class="muted">
+      Saldo total:
+      <strong class="money" [class.negativo]="total() < 0">{{ total() | currency: 'BRL' }}</strong>
+    </p>
+  </div>
+  <button type="button" class="btn btn-primary" (click)="nova()">Nova conta</button>
+</header>
+
+@if (erro()) {
+  <p class="erro">{{ erro() }}</p>
+}
+
+@if (carregando()) {
+  <p class="muted">Carregando...</p>
+} @else if (contas().length === 0) {
+  <div class="card">
+    <p>Você ainda não tem nenhuma conta.</p>
+    <p class="muted">Crie a primeira (conta corrente, carteira, poupança...) para começar a lançar.</p>
+    <button type="button" class="btn btn-primary" (click)="nova()">Criar conta</button>
+  </div>
+} @else {
+  <section class="grade">
+    @for (c of contas(); track c.id) {
+      <article class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: .5rem">
+          <h2 style="margin: 0; font-size: 1.1rem">{{ c.nome }}</h2>
+          <span class="badge">{{ rotulo(c.tipo) }}</span>
+        </div>
+        @if (c.instituicao) {
+          <p class="muted" style="margin: .25rem 0 0">{{ c.instituicao }}</p>
+        }
+        <p class="money" style="font-size: 1.6rem; font-weight: 700; margin: 1rem 0" [class.negativo]="c.saldoAtual < 0">
+          {{ c.saldoAtual | currency: 'BRL' }}
+        </p>
+        <div style="display: flex; gap: .5rem">
+          <button type="button" class="btn btn-ghost" (click)="editar(c)">Editar</button>
+          <button type="button" class="btn btn-ghost btn-perigo" (click)="arquivar(c)">Arquivar</button>
+        </div>
+      </article>
+    }
+  </section>
+}
+
+<dialog #dialog class="modal">
+  <form [formGroup]="form" (ngSubmit)="salvar()">
+    <h2>{{ editando() ? 'Editar conta' : 'Nova conta' }}</h2>
+
+    <label>
+      Nome
+      <input type="text" formControlName="nome" placeholder="Ex.: Nubank" />
+    </label>
+    @if (form.controls.nome.touched && form.controls.nome.invalid) {
+      <small class="erro">Informe o nome da conta</small>
+    }
+
+    <label>
+      Tipo
+      <select formControlName="tipo">
+        @for (t of tipos; track t.valor) {
+          <option [value]="t.valor">{{ t.rotulo }}</option>
+        }
+      </select>
+    </label>
+
+    <label>
+      Instituição (opcional)
+      <input type="text" formControlName="instituicao" placeholder="Ex.: Nubank, Itaú..." />
+    </label>
+
+    <label>
+      Saldo inicial
+      <input type="number" step="0.01" formControlName="saldoInicial" />
+    </label>
+    @if (form.controls.saldoInicial.touched && form.controls.saldoInicial.invalid) {
+      <small class="erro">Informe o saldo inicial (pode ser 0)</small>
+    }
+
+    @if (erroForm()) {
+      <p class="erro">{{ erroForm() }}</p>
+    }
+
+    <div class="modal-acoes">
+      <button type="button" class="btn btn-ghost" (click)="fechar()">Cancelar</button>
+      <button type="submit" class="btn btn-primary" [disabled]="salvando()">
+        {{ salvando() ? 'Salvando...' : 'Salvar' }}
+      </button>
+    </div>
+  </form>
+</dialog>

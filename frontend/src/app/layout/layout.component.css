@@ -1,0 +1,41 @@
+.app { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
+
+.lateral {
+  position: sticky; top: 0; height: 100vh;
+  display: flex; flex-direction: column; gap: 1.5rem;
+  padding: 1.25rem;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+}
+.marca {
+  display: flex; align-items: center; gap: .6rem;
+  text-decoration: none; color: var(--text);
+  font-size: 1.4rem; font-weight: 700;
+}
+.menu { display: flex; flex-direction: column; gap: .25rem; }
+.menu a {
+  padding: .65rem .8rem; border-radius: var(--radius);
+  color: var(--text-muted); text-decoration: none; font-weight: 600;
+}
+.menu a:hover { background: var(--bg); color: var(--text); }
+.menu a.ativo { background: color-mix(in srgb, var(--primary) 14%, transparent); color: var(--primary); }
+
+.rodape { margin-top: auto; display: flex; flex-direction: column; gap: .75rem; }
+.usuario { font-size: .9rem; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rodape-acoes { display: flex; align-items: center; gap: .5rem; }
+
+.conteudo { padding: 2rem; width: 100%; max-width: 1000px; }
+
+@media (max-width: 768px) {
+  .app { grid-template-columns: 1fr; padding-bottom: 76px; }
+  .lateral {
+    position: fixed; inset: auto 0 0 0; height: auto; z-index: 20;
+    flex-direction: row; align-items: center; justify-content: space-between;
+    gap: .5rem; padding: .5rem .75rem;
+    border-right: 0; border-top: 1px solid var(--border);
+  }
+  .marca span, .usuario { display: none; }
+  .menu { flex-direction: row; }
+  .rodape { margin-top: 0; flex-direction: row; align-items: center; }
+  .conteudo { padding: 1rem; }
+}

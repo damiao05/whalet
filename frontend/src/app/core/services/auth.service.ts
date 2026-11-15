@@ -49,6 +49,10 @@ export class AuthService {
     return localStorage.getItem(TOKEN_KEY);
   }
 
+  get nome(): string {
+    return localStorage.getItem(NOME_KEY) ?? '';
+  }
+
   estaLogado(): boolean {
     return !!this.token;
   }
