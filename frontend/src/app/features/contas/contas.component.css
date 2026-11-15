@@ -1,0 +1,13 @@
+.conta {
+  display: flex;
+  flex-direction: column;
+  border-top: 4px solid var(--cor-conta, var(--primary));
+}
+.topo { display: flex; align-items: center; gap: .75rem; }
+.titulo { min-width: 0; }
+.titulo h2 { margin: 0; font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.subtitulo { margin: .1rem 0 0; font-size: .85rem; color: var(--text-muted); }
+.saldo { font-size: 1.6rem; font-weight: 700; margin: 1rem 0 1.25rem; }
+.acoes { display: flex; gap: .5rem; margin-top: auto; } 
+
+.previa { display: flex; align-items: center; gap: .75rem; }
