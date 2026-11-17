@@ -75,4 +75,7 @@ public class Transacao {
 
     @Column(name = "parcela_total")
     private Integer parcelaTotal;
+
+    @Column(name = "recorrencia_id")
+    private UUID recorrenciaId;
 }

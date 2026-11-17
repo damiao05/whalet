@@ -6,13 +6,16 @@ import controle.financeiro.models.CartaoCredito;
 import controle.financeiro.models.Conta;
 import controle.financeiro.repositories.CartaoCreditoRepository;
 import controle.financeiro.repositories.ContaRepository;
+import controle.financeiro.repositories.TransacaoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -21,13 +24,14 @@ public class CartaoCreditoService {
 
     private final CartaoCreditoRepository repository;
     private final ContaRepository contaRepository;
+    private final TransacaoRepository transacaoRepository;
     private final UsuarioLogado usuarioLogado;
 
     @Transactional(readOnly = true)
     public List<CartaoResponseDTO> listar() {
         UUID usuarioId = usuarioLogado.obter().getId();
-        return repository.findByUsuarioIdAndAtivoTrueOrderByNomeAsc(usuarioId)
-                .stream().map(CartaoResponseDTO::de).toList();
+        return repository.findByUsuarioIdAndAtivoTrueOrderByNomeAsc(usuarioId).stream()
+                .map(c -> CartaoResponseDTO.de(c, usado(c.getId()))).toList();
     }
 
     @Transactional
@@ -35,19 +39,25 @@ public class CartaoCreditoService {
         CartaoCredito cartao = new CartaoCredito();
         cartao.setUsuario(usuarioLogado.obter());
         aplicar(cartao, dto);
-        return CartaoResponseDTO.de(repository.save(cartao));
+        return CartaoResponseDTO.de(repository.save(cartao), BigDecimal.ZERO);
     }
 
     @Transactional
     public CartaoResponseDTO atualizar(UUID id, CartaoRequestDTO dto) {
         CartaoCredito cartao = buscar(id);
         aplicar(cartao, dto);
-        return CartaoResponseDTO.de(cartao);
+        return CartaoResponseDTO.de(cartao, usado(cartao.getId()));
     }
 
     @Transactional
     public void arquivar(UUID id) {
         buscar(id).setAtivo(false);
+    }
+
+    private BigDecimal usado(UUID cartaoId) {
+        BigDecimal divida = Objects.requireNonNullElse(
+                transacaoRepository.somarDividaDoCartao(cartaoId), BigDecimal.ZERO);
+        return divida.max(BigDecimal.ZERO);
     }
 
     private CartaoCredito buscar(UUID id) {
@@ -71,5 +81,4 @@ public class CartaoCreditoService {
         }
         cartao.setContaPagamento(conta);
     }
-
 }
