@@ -3,6 +3,7 @@ package controle.financeiro.services;
 import controle.financeiro.dtos.StatusRequestDTO;
 import controle.financeiro.dtos.TransacaoRequestDTO;
 import controle.financeiro.dtos.TransacaoResponseDTO;
+import controle.financeiro.services.VinculosResolver.Vinculos;
 import controle.financeiro.models.*;
 import controle.financeiro.repositories.CartaoCreditoRepository;
 import controle.financeiro.repositories.CategoriaRepository;
@@ -29,14 +30,15 @@ public class TransacaoService {
     // O servidor em produção costuma estar em UTC; "hoje" precisa ser o de Brasília.
     private static final ZoneId FUSO = ZoneId.of("America/Sao_Paulo");
 
-    /** Entidades já validadas (todas pertencem ao usuário logado). */
-    private record Vinculos(Conta conta, Conta contaDestino, CartaoCredito cartao, Categoria categoria) {}
-
     private final TransacaoRepository repository;
+    private final VinculosResolver vinculosResolver;
     private final ContaRepository contaRepository;
-    private final CartaoCreditoRepository cartaoRepository;
-    private final CategoriaRepository categoriaRepository;
     private final UsuarioLogado usuarioLogado;
+
+    private Vinculos resolver(TransacaoRequestDTO dto, UUID usuarioId) {
+        return vinculosResolver.resolver(dto.tipo(), dto.contaId(), dto.contaDestinoId(),
+                dto.cartaoId(), dto.categoriaId(), usuarioId);
+    }
 
     @Transactional(readOnly = true)
     public List<TransacaoResponseDTO> listar(YearMonth mes) {
@@ -85,7 +87,9 @@ public class TransacaoService {
         t.setValor(dto.valor());
         t.setDataTransacao(dto.data());
         if (v.cartao() != null) {
-            t.setStatus(StatusTransacao.EFETIVADA);
+            if (t.getRecorrenciaId() == null) {
+                t.setStatus(StatusTransacao.EFETIVADA);
+            }
         } else if (dto.status() != null) {
             t.setStatus(dto.status());
         }
@@ -122,60 +126,6 @@ public class TransacaoService {
     private Transacao buscar(UUID id) {
         return repository.findByIdAndUsuarioId(id, usuarioLogado.obter().getId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Transação não encontrada"));
-    }
-
-    /** Valida as combinações de cada tipo e carrega as entidades, sempre checando o dono. */
-    private Vinculos resolver(TransacaoRequestDTO dto, UUID usuarioId) {
-        return switch (dto.tipo()) {
-            case PAGAMENTO_FATURA -> throw erro("O pagamento de fatura tem endpoint próprio");
-
-            case TRANSFERENCIA -> {
-                if (dto.contaId() == null || dto.contaDestinoId() == null) {
-                    throw erro("Informe a conta de origem e a de destino");
-                }
-                if (dto.contaId().equals(dto.contaDestinoId())) {
-                    throw erro("A origem e o destino precisam ser contas diferentes");
-                }
-                if (dto.cartaoId() != null || dto.categoriaId() != null) {
-                    throw erro("Transferência não usa cartão nem categoria");
-                }
-                yield new Vinculos(contaAtiva(dto.contaId(), usuarioId),
-                        contaAtiva(dto.contaDestinoId(), usuarioId), null, null);
-            }
-
-            case RECEITA, DESPESA -> {
-                if (dto.contaDestinoId() != null) {
-                    throw erro("Conta de destino só vale para transferências");
-                }
-                if ((dto.contaId() == null) == (dto.cartaoId() == null)) {
-                    throw erro("Informe a conta ou o cartão (apenas um dos dois)");
-                }
-
-                Conta conta = null;
-                CartaoCredito cartao = null;
-                if (dto.contaId() != null) {
-                    conta = contaAtiva(dto.contaId(), usuarioId);
-                } else {
-                    if (dto.tipo() != TipoTransacao.DESPESA) {
-                        throw erro("No cartão só é possível lançar despesas");
-                    }
-                    cartao = cartaoRepository.findByIdAndUsuarioId(dto.cartaoId(), usuarioId)
-                            .filter(CartaoCredito::isAtivo)
-                            .orElseThrow(() -> erro("Cartão inválido"));
-                }
-
-                Categoria categoria = null;
-                if (dto.categoriaId() != null) {
-                    categoria = categoriaRepository.findByIdAndUsuarioId(dto.categoriaId(), usuarioId)
-                            .filter(Categoria::isAtiva)
-                            .orElseThrow(() -> erro("Categoria inválida"));
-                    if (categoria.getTipo() != dto.tipo()) {
-                        throw erro("A categoria não é do mesmo tipo da transação");
-                    }
-                }
-                yield new Vinculos(conta, null, cartao, categoria);
-            }
-        };
     }
 
     private Conta contaAtiva(UUID id, UUID usuarioId) {
