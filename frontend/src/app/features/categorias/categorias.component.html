@@ -1,0 +1,97 @@
+<header class="pagina-topo">
+  <div>
+    <h1>Categorias</h1>
+    <p class="muted">Organize seus lançamentos por tipo de gasto e de ganho.</p>
+  </div>
+</header>
+
+@if (erro()) {
+  <p class="erro">{{ erro() }}</p>
+}
+
+@if (carregando()) {
+  <p class="muted">Carregando...</p>
+} @else {
+  <div class="colunas">
+    <section class="card">
+      <div class="cabecalho">
+        <h2>Despesas</h2>
+        <button type="button" class="btn btn-ghost btn-sm" (click)="nova('DESPESA')">Nova</button>
+      </div>
+      <ul class="lista">
+        @for (c of despesas(); track c.id) {
+          <li class="item">
+            <span class="ponto" [style.background]="c.cor || '#64748B'"></span>
+            <span class="nome">{{ c.nome }}</span>
+            <button type="button" class="btn btn-ghost btn-sm" (click)="editar(c)">Editar</button>
+            <button type="button" class="btn btn-ghost btn-sm btn-perigo" (click)="arquivar(c)">Arquivar</button>
+          </li>
+        } @empty {
+          <li class="muted vazio">Nenhuma categoria de despesa.</li>
+        }
+      </ul>
+    </section>
+
+    <section class="card">
+      <div class="cabecalho">
+        <h2>Receitas</h2>
+        <button type="button" class="btn btn-ghost btn-sm" (click)="nova('RECEITA')">Nova</button>
+      </div>
+      <ul class="lista">
+        @for (c of receitas(); track c.id) {
+          <li class="item">
+            <span class="ponto" [style.background]="c.cor || '#64748B'"></span>
+            <span class="nome">{{ c.nome }}</span>
+            <button type="button" class="btn btn-ghost btn-sm" (click)="editar(c)">Editar</button>
+            <button type="button" class="btn btn-ghost btn-sm btn-perigo" (click)="arquivar(c)">Arquivar</button>
+          </li>
+        } @empty {
+          <li class="muted vazio">Nenhuma categoria de receita.</li>
+        }
+      </ul>
+    </section>
+  </div>
+}
+
+<dialog #dialog class="modal">
+  <form [formGroup]="form" (ngSubmit)="salvar()">
+    <h2>{{ editando() ? 'Editar categoria' : 'Nova categoria' }}</h2>
+
+    <label>
+      Nome
+      <input type="text" formControlName="nome" placeholder="Ex.: Pets" />
+    </label>
+    @if (form.controls.nome.touched && form.controls.nome.invalid) {
+      <small class="erro">Informe o nome da categoria</small>
+    }
+
+    <label>
+      Tipo
+      <select formControlName="tipo">
+        <option value="DESPESA">Despesa</option>
+        <option value="RECEITA">Receita</option>
+      </select>
+    </label>
+
+    <fieldset class="grupo">
+      <legend>Cor</legend>
+      <div class="cores">
+        @for (c of cores; track c) {
+          <button type="button" class="cor" [style.background]="c" [class.ativa]="form.controls.cor.value === c"
+                  (click)="escolherCor(c)" [attr.aria-label]="'Cor ' + c"></button>
+        }
+      </div>
+    </fieldset>
+
+    @if (erroForm()) {
+      <p class="erro">{{ erroForm() }}</p>
+    }
+
+    <div class="modal-acoes">
+      <button type="button" class="btn btn-ghost" (click)="fechar()">Cancelar</button>
+      <button type="submit" class="btn btn-primary" [disabled]="salvando()">
+        {{ salvando() ? 'Salvando...' : 'Salvar' }}
+      </button>
+    </div>
+  </form>
+</dialog>

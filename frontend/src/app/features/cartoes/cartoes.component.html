@@ -1,0 +1,146 @@
+<header class="pagina-topo">
+  <div>
+    <h1>Cartões de crédito</h1>
+    <p class="muted">
+      Limite total:
+      <strong class="money">{{ limiteTotal() | currency: 'BRL' }}</strong>
+    </p>
+  </div>
+  <button type="button" class="btn btn-primary" (click)="novo()">Novo cartão</button>
+</header>
+
+@if (erro()) {
+  <p class="erro">{{ erro() }}</p>
+}
+
+@if (carregando()) {
+  <p class="muted">Carregando...</p>
+} @else if (cartoes().length === 0) {
+  <div class="card">
+    <p>Você ainda não tem nenhum cartão.</p>
+    <p class="muted">Cadastre seus cartões para lançar as compras no crédito.</p>
+    <button type="button" class="btn btn-primary" (click)="novo()">Criar cartão</button>
+  </div>
+} @else {
+  <section class="grade">
+    @for (c of cartoes(); track c.id) {
+      <article class="card cartao" [style.--cor-cartao]="c.cor || 'var(--primary)'">
+        <div class="topo">
+          <app-avatar [nome]="nomeAvatar(c.icon, c.nome)" [cor]="c.cor" />
+          <div class="titulo">
+            <h2>{{ c.nome }}</h2>
+            <p class="subtitulo">{{ subtitulo(c) }}</p>
+          </div>
+        </div>
+
+        <div class="limite">
+          <span class="muted">Limite</span>
+          <strong class="money">{{ c.limite | currency: 'BRL' }}</strong>
+        </div>
+        <p class="paga muted">Paga com: {{ nomeDaConta(c.contaPagamentoId) }}</p>
+
+        <div class="acoes">
+          <button type="button" class="btn btn-ghost" (click)="editar(c)">Editar</button>
+          <button type="button" class="btn btn-ghost btn-perigo" (click)="arquivar(c)">Arquivar</button>
+        </div>
+      </article>
+    }
+  </section>
+}
+
+<dialog #dialog class="modal">
+  <form [formGroup]="form" (ngSubmit)="salvar()">
+    <h2>{{ editando() ? 'Editar cartão' : 'Novo cartão' }}</h2>
+
+    <div class="previa">
+      <app-avatar [nome]="nomeAvatar(form.controls.icone.value, form.controls.nome.value)"
+                  [cor]="form.controls.cor.value || null" [tamanho]="48" />
+      <span class="muted">Assim o cartão aparecerá na lista</span>
+    </div>
+
+    <fieldset class="grupo">
+      <legend>Emissor</legend>
+      <div class="chips">
+        @for (i of instituicoes; track i.chave) {
+          <button type="button" class="chip" [class.ativo]="form.controls.icone.value === i.chave"
+                  (click)="escolherInstituicao(i)">
+            <span class="ponto" [style.background]="i.cor"></span>{{ i.nome }}
+          </button>
+        }
+      </div>
+    </fieldset>
+
+    <label>
+      Nome
+      <input type="text" formControlName="nome" placeholder="Ex.: Cartão Nubank" />
+    </label>
+    @if (form.controls.nome.touched && form.controls.nome.invalid) {
+      <small class="erro">Informe o nome do cartão</small>
+    }
+
+    <label>
+      Bandeira
+      <select formControlName="bandeira">
+        <option value="">Não informar</option>
+        @for (b of bandeiras; track b) {
+          <option [value]="b">{{ b }}</option>
+        }
+      </select>
+    </label>
+
+    <label>
+      Limite
+      <app-money-input formControlName="limite" />
+    </label>
+
+    <div class="duas-colunas">
+      <label>
+        Fecha no dia
+        <select formControlName="diaFechamento">
+          @for (d of dias; track d) {
+            <option [ngValue]="d">{{ d }}</option>
+          }
+        </select>
+      </label>
+      <label>
+        Vence no dia
+        <select formControlName="diaVencimento">
+          @for (d of dias; track d) {
+            <option [ngValue]="d">{{ d }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    <label>
+      Conta que paga a fatura
+      <select formControlName="contaPagamentoId">
+        <option value="">Nenhuma</option>
+        @for (c of contas(); track c.id) {
+          <option [value]="c.id">{{ c.nome }}</option>
+        }
+      </select>
+    </label>
+
+    <fieldset class="grupo">
+      <legend>Cor</legend>
+      <div class="cores">
+        @for (c of cores; track c) {
+          <button type="button" class="cor" [style.background]="c" [class.ativa]="form.controls.cor.value === c"
+                  (click)="escolherCor(c)" [attr.aria-label]="'Cor ' + c"></button>
+        }
+      </div>
+    </fieldset>
+
+    @if (erroForm()) {
+      <p class="erro">{{ erroForm() }}</p>
+    }
+
+    <div class="modal-acoes">
+      <button type="button" class="btn btn-ghost" (click)="fechar()">Cancelar</button>
+      <button type="submit" class="btn btn-primary" [disabled]="salvando()">
+        {{ salvando() ? 'Salvando...' : 'Salvar' }}
+      </button>
+    </div>
+  </form>
+</dialog>

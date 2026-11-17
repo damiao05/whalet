@@ -1,0 +1,17 @@
+.cartao {
+  display: flex;
+  flex-direction: column;
+  border-top: 4px solid var(--cor-cartao, var(--primary));
+}
+.topo { display: flex; align-items: center; gap: .75rem; }
+.titulo { min-width: 0; }
+.titulo h2 { margin: 0; font-size: 1.05rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.subtitulo { margin: .1rem 0 0; font-size: .8rem; color: var(--text-muted); }
+
+.limite { display: flex; flex-direction: column; margin: 1rem 0 .25rem; }
+.limite strong { font-size: 1.5rem; }
+.paga { margin: 0 0 1.25rem; font-size: .85rem; }
+.acoes { display: flex; gap: .5rem; margin-top: auto; }
+
+.previa { display: flex; align-items: center; gap: .75rem; }
+.duas-colunas { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }

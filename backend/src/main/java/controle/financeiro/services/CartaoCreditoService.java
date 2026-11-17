@@ -61,6 +61,8 @@ public class CartaoCreditoService {
         cartao.setLimite(dto.limite());
         cartao.setDiaFechamento(dto.diaFechamento());
         cartao.setDiaVencimento(dto.diaVencimento());
+        cartao.setCor(dto.cor());
+        cartao.setIcon(dto.icon());
 
         Conta conta = null;
         if (dto.contaPagamentoId() != null) {

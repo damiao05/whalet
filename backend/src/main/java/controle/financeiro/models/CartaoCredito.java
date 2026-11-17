@@ -39,6 +39,12 @@ public class CartaoCredito {
     @JoinColumn(name = "conta_pagamento_id")
     private Conta contaPagamento;
 
+    @Column(length = 7)
+    private String cor;
+
+    @Column(length = 30)
+    private String icon;
+
     @Column(nullable = false)
     private boolean ativo = true;
 
