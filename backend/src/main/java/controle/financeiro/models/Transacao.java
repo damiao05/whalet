@@ -55,4 +55,24 @@ public class Transacao {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "categoria_id")
     private Categoria categoria;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private StatusTransacao status = StatusTransacao.EFETIVADA;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "conta_destino_id")
+    private Conta contaDestino;
+
+    @Column(name = "fatura_mes")
+    private LocalDate faturaMes;
+
+    @Column(name = "grupo_parcelas_id")
+    private UUID grupoParcelasId;
+
+    @Column(name = "parcela_numero")
+    private Integer parcelaNumero;
+
+    @Column(name = "parcela_total")
+    private Integer parcelaTotal;
 }

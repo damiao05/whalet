@@ -1,5 +1,6 @@
 package controle.financeiro.controllers;
 
+import controle.financeiro.dtos.StatusRequestDTO;
 import controle.financeiro.dtos.TransacaoRequestDTO;
 import controle.financeiro.dtos.TransacaoResponseDTO;
 import controle.financeiro.services.TransacaoService;
@@ -27,9 +28,10 @@ public class TransacaoController {
         return service.listar(mes != null ? mes : YearMonth.now());
     }
 
+    /** Retorna uma lista: 1 item, ou N se foi parcelado. */
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public TransacaoResponseDTO criar(@Valid @RequestBody TransacaoRequestDTO dto) {
+    public List<TransacaoResponseDTO> criar(@Valid @RequestBody TransacaoRequestDTO dto) {
         return service.criar(dto);
     }
 
@@ -38,9 +40,16 @@ public class TransacaoController {
         return service.atualizar(id, dto);
     }
 
+    /** Marcar como pago/recebido: PATCH /api/transacoes/{id}/status  { "status": "EFETIVADA", "data": "2026-11-20" } */
+    @PatchMapping("/{id}/status")
+    public TransacaoResponseDTO alterarStatus(@PathVariable UUID id, @Valid @RequestBody StatusRequestDTO dto) {
+        return service.alterarStatus(id, dto);
+    }
+
+    /** DELETE /api/transacoes/{id}?todasParcelas=true apaga o grupo inteiro de parcelas. */
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void excluir(@PathVariable UUID id) {
-        service.excluir(id);
+    public void excluir(@PathVariable UUID id, @RequestParam(defaultValue = "false") boolean todasParcelas) {
+        service.excluir(id, todasParcelas);
     }
 }
