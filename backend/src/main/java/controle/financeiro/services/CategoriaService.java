@@ -54,6 +54,8 @@ public class CategoriaService {
 
     @Transactional
     public CategoriaResponseDTO criar(CategoriaRequestDTO dto) {
+        if (dto.tipo() != RECEITA && dto.tipo() != DESPESA) throw erro("Categoria só pode ser de receita ou despesa");
+
         Usuario usuario = usuarioLogado.obter();
         validarNomeUnico(usuario.getId(), dto.tipo(), dto.nome().trim());
 

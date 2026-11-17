@@ -1,5 +1,6 @@
 package controle.financeiro.dtos;
 
+import controle.financeiro.models.StatusTransacao;
 import controle.financeiro.models.TipoTransacao;
 import jakarta.validation.constraints.*;
 import java.math.BigDecimal;
@@ -12,7 +13,10 @@ public record TransacaoRequestDTO(
         @NotNull TipoTransacao tipo,
         @NotNull LocalDate data,
         UUID contaId,
+        UUID contaDestinoId,
         UUID cartaoId,
         UUID categoriaId,
+        StatusTransacao status,
+        @Min(2) @Max(360) Integer parcelas,
         String metadados
 ) {}

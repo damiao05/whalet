@@ -15,6 +15,8 @@ public interface TransacaoRepository extends JpaRepository<Transacao, UUID> {
 
     Optional<Transacao> findByIdAndUsuarioId(UUID id, UUID usuarioId);
 
+    List<Transacao> findByGrupoParcelasIdAndUsuarioId(UUID grupoParcelasId, UUID usuarioId);
+
     @Query("""
             select t from Transacao t
             where t.usuario.id = :usuarioId
@@ -25,12 +27,22 @@ public interface TransacaoRepository extends JpaRepository<Transacao, UUID> {
                                      @Param("inicio") LocalDate inicio,
                                      @Param("fim") LocalDate fim);
 
-    /** Receitas somam, despesas subtraem. Retorna null se a conta não tem transações. */
+    /**
+     * Movimentação EFETIVADA da conta:
+     *  - receita soma;
+     *  - despesa, pagamento de fatura e transferência de SAÍDA subtraem;
+     *  - transferência de ENTRADA (a conta é o destino) soma.
+     * Retorna null se a conta não tem movimentações.
+     */
     @Query("""
-            select sum(case when t.tipo = controle.financeiro.models.TipoTransacao.RECEITA
-                            then t.valor else -t.valor end)
+            select sum(case
+                           when t.tipo = controle.financeiro.models.TipoTransacao.RECEITA then t.valor
+                           when t.conta.id = :contaId then -t.valor
+                           else t.valor
+                       end)
             from Transacao t
-            where t.conta.id = :contaId
+            where t.status = controle.financeiro.models.StatusTransacao.EFETIVADA
+              and (t.conta.id = :contaId or t.contaDestino.id = :contaId)
             """)
     BigDecimal somarMovimentacaoDaConta(@Param("contaId") UUID contaId);
 }
