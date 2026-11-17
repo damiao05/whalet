@@ -204,3 +204,5 @@ fieldset.grupo legend { font-size: .9rem; padding: 0 0 .4rem; }
   border: 2px solid transparent; cursor: pointer;
 }
 .cor.ativa { outline: 2px solid var(--text); outline-offset: 2px; }
+
+.btn-sm { min-height: 32px; padding: 0 .65rem; font-size: .85rem; }
