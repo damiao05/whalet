@@ -7,6 +7,7 @@ import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { ContasComponent } from './features/contas/contas.component';
 import { CartoesComponent } from './features/cartoes/cartoes.component';
 import { CategoriasComponent } from './features/categorias/categorias.component';
+import { LancamentosComponent } from './features/lancamentos/lancamentos.component';
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
@@ -17,6 +18,7 @@ export const routes: Routes = [
         canActivate: [authGuard],
         children: [
             { path: 'dashboard', component: DashboardComponent },
+            { path: 'lancamentos', component: LancamentosComponent },
             { path: 'contas', component: ContasComponent },
             { path: 'cartoes', component: CartoesComponent },
             { path: 'categorias', component: CategoriasComponent },

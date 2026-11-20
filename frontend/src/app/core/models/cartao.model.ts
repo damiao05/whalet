@@ -1,8 +1,10 @@
 export interface Cartao {
-    id: string,
-    nome: string,
-    bandeira: string | null,
-    limite: number,
+    id: string;
+    nome: string;
+    bandeira: string | null;
+    limite: number;
+    limiteUsado: number;
+    limiteDisponivel: number;
     diaFechamento: number;
     diaVencimento: number;
     contaPagamentoId: string | null;
