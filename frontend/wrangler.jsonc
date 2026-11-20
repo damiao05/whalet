@@ -1,0 +1,9 @@
+{
+  "name": "whalet",
+  "compatibility_date": "2026-11-19",
+  "assets": {
+    // Ajuste "controle-financeiro-web" para o nome do projeto no seu angular.json
+    "directory": "./dist/controle-financeiro-web/browser",
+    "not_found_handling": "single-page-application"
+  }
+}

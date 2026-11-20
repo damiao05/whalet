@@ -98,4 +98,14 @@ public interface TransacaoRepository extends JpaRepository<Transacao, UUID> {
               and t.dataTransacao <= :hoje
             """)
     int efetivarComprasDeCartaoVencidas(@Param("hoje") LocalDate hoje);
+
+    @Query("""
+        select t from Transacao t
+        where t.usuario.id = :usuarioId
+          and t.status = controle.financeiro.models.StatusTransacao.PENDENTE
+          and t.cartao is null
+          and t.dataTransacao <= :ate
+        order by t.dataTransacao, t.dataCriacao
+        """)
+    List<Transacao> pendentesAte(@Param("usuarioId") UUID usuarioId, @Param("ate") LocalDate ate);
 }

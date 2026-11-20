@@ -34,14 +34,21 @@
         </div>
 
         <div class="limite">
-          <span class="muted">Limite</span>
-          <strong class="money">{{ c.limite | currency: 'BRL' }}</strong>
+          <span class="muted">Limite disponível</span>
+          <strong class="money">{{ c.limiteDisponivel | currency: 'BRL' }}</strong>
         </div>
-        <p class="paga muted">Paga com: {{ nomeDaConta(c.contaPagamentoId) }}</p>
+        <div class="barra" role="img" [attr.aria-label]="'Limite usado: ' + percentualLimite(c).toFixed(0) + '%'">
+            <span [style.width.%]="percentualLimite(c)" [class.cheio]="percentualLimite(c) >= 85"></span>
+        </div>
+        <p class="paga muted">
+            Usado {{ c.limiteUsado | currency: 'BRL' }} de {{ c.limite | currency: 'BRL' }}<br />
+            Paga com: {{ nomeDaConta(c.contaPagamentoId) }}
+        </p>
 
         <div class="acoes">
-          <button type="button" class="btn btn-ghost" (click)="editar(c)">Editar</button>
-          <button type="button" class="btn btn-ghost btn-perigo" (click)="arquivar(c)">Arquivar</button>
+            <a class="btn btn-ghost" [routerLink]="['/cartoes', c.id, 'faturas']">Fatura</a>
+            <button type="button" class="btn btn-ghost" (click)="editar(c)">Editar</button>
+            <button type="button" class="btn btn-ghost btn-perigo" (click)="arquivar(c)">Arquivar</button>
         </div>
       </article>
     }

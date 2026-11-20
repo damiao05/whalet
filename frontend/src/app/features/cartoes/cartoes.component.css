@@ -11,7 +11,10 @@
 .limite { display: flex; flex-direction: column; margin: 1rem 0 .25rem; }
 .limite strong { font-size: 1.5rem; }
 .paga { margin: 0 0 1.25rem; font-size: .85rem; }
-.acoes { display: flex; gap: .5rem; margin-top: auto; }
+.acoes { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: auto; }
+.barra { height: 8px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); overflow: hidden; margin: .4rem 0 .6rem; }
+.barra span { display: block; height: 100%; background: var(--primary); }
+.barra span.cheio { background: var(--danger); }
 
 .previa { display: flex; align-items: center; gap: .75rem; }
 .duas-colunas { display: grid; grid-template-columns: 1fr 1fr; gap: .75rem; }

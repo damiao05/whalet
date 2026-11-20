@@ -29,4 +29,9 @@ export class TransacoesService {
     excluir(id: string, todasParcelas = false): Observable<void> {
         return this.http.delete<void>(`${this.url}/${id}`, { params: { todasParcelas } });
     }
+
+    /** Pendentes de conta (a pagar / a receber) até a data, incluindo as atrasadas. */
+    pendentes(ate: string): Observable<Transacao[]> {
+    return this.http.get<Transacao[]>(`${this.url}/pendentes`, { params: { ate } });
+    }
 }

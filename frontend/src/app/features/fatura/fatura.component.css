@@ -1,0 +1,35 @@
+.voltar { display: inline-block; margin-bottom: 1rem; color: var(--text-muted); text-decoration: none; }
+.voltar:hover { color: var(--primary); }
+.identidade { display: flex; align-items: center; gap: .9rem; }
+.identidade h1 { margin: 0; }
+.identidade p { margin: .1rem 0 0; }
+
+.navmes { display: flex; align-items: center; gap: .75rem; margin-bottom: 1rem; flex-wrap: wrap; }
+.mes { display: flex; flex-direction: column; min-width: 12rem; text-align: center; }
+.mes strong { text-transform: capitalize; }
+
+.situacao {
+  padding: .2rem .7rem; border: 1px solid var(--border); border-radius: 999px;
+  font-size: .8rem; font-weight: 600; color: var(--text-muted);
+}
+.situacao[data-status='PAGA'] { color: var(--success); border-color: var(--success); }
+.situacao[data-status='VENCIDA'] { color: var(--danger); border-color: var(--danger); }
+.situacao[data-status='FECHADA'] { color: var(--primary); border-color: var(--primary); }
+
+.resumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+.resumo .card { display: flex; flex-direction: column; gap: .25rem; }
+.resumo strong { font-size: 1.4rem; }
+.receita { color: var(--success); }
+.despesa { color: var(--danger); }
+
+.acoes-topo { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+.titulo-secao { font-size: 1.1rem; margin: 1.5rem 0 .5rem; }
+
+.lista-card { padding: 0; }
+.lista { list-style: none; margin: 0; padding: 0; }
+.linha {
+  display: grid; grid-template-columns: 3.5rem 1fr auto auto; align-items: center; gap: .75rem;
+  padding: .75rem 1rem; border-bottom: 1px solid var(--border);
+}
+.linha:last-child { border-bottom: 0; }
+.desc { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem; min-width: 0; }
