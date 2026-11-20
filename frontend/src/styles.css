@@ -206,3 +206,17 @@ fieldset.grupo legend { font-size: .9rem; padding: 0 0 .4rem; }
 .cor.ativa { outline: 2px solid var(--text); outline-offset: 2px; }
 
 .btn-sm { min-height: 32px; padding: 0 .65rem; font-size: .85rem; }
+
+input[type='checkbox'] { width: auto; }
+
+.segmentos {
+  display: inline-flex; flex-wrap: wrap;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface-2); padding: 3px; gap: 3px;
+}
+.segmento {
+  min-height: 34px; padding: 0 .9rem; border: 0; border-radius: calc(var(--radius) - 3px);
+  background: transparent; color: var(--text-muted);
+  font: inherit; font-size: .9rem; font-weight: 600; cursor: pointer;
+}
+.segmento.ativo { background: var(--primary); color: var(--on-primary); }

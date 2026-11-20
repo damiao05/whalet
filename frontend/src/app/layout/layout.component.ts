@@ -15,6 +15,7 @@ export class LayoutComponent {
 
     itens = [
         { rota: '/dashboard', rotulo: 'Início' },
+        { rota: '/lancamentos', rotulo: 'Lançamentos' },
         { rota: '/contas', rotulo: 'Contas' },
         { rota: '/cartoes', rotulo: 'Cartões' },
         { rota: '/categorias', rotulo: 'Categorias' },
