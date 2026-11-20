@@ -1,0 +1,26 @@
+<div class="app">
+    <aside class="lateral">
+        <a class="marca" routerlink="/dashboard">
+            <app-logo [tamanho]="36" />
+            <span>Whalet</span>
+        </a>
+
+        <nav class="menu">
+            @for (item of itens; track item.rota) {
+                <a [routerLink]="item.rota" routerLinkActive="ativo">{{ item.rotulo }}</a>
+            }
+        </nav>
+
+        <div class="rodape">
+            <span class="usuario">{{ auth.nome }}</span>
+            <div class="rodape-acoes">
+                <app-theme-toggle />
+                <button type="button" class="btn btn-ghost" (click)="auth.logout()">Sair</button>
+            </div>
+        </div>
+    </aside>
+
+    <main class="conteudo">
+        <router-outlet />
+    </main>
+</div>

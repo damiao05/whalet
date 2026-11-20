@@ -18,6 +18,18 @@ export class LoginComponent {
   erro = signal('');
   carregando = signal(false);
 
+  demorando = signal(false);
+  private temporizador?: ReturnType<typeof setTimeout>;
+
+  private iniciarAviso(): void {
+    this.temporizador = setTimeout(() => this.demorando.set(true), 4000);
+  }
+
+  private pararAviso(): void {
+    clearTimeout(this.temporizador);
+    this.demorando.set(false);
+  }
+
   form = this.fb.nonNullable.group({
     email: ['', [Validators.required, Validators.email]],
     senha: ['', [Validators.required, Validators.minLength(6)]],
@@ -30,13 +42,18 @@ export class LoginComponent {
     }
 
     this.carregando.set(true);
+    this.iniciarAviso();
     this.erro.set('');
 
     const { email, senha } = this.form.getRawValue();
     this.auth.login(email, senha).subscribe({
-      next: () => this.irParaDashboard(),
+      next: () => {
+        this.pararAviso();
+        this.irParaDashboard();
+      },
       error: (e) => {
         this.carregando.set(false);
+        this.pararAviso();
         this.erro.set(e.status === 401 ? 'E-mail ou senha inválidos' : 'Não foi possível conectar ao servidor');
       },
     });

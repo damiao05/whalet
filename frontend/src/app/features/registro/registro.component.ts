@@ -29,7 +29,7 @@ export class RegistroComponent {
       primeiroNome: ['', [Validators.required, Validators.maxLength(100)]],
       sobrenome: ['', [Validators.required, Validators.maxLength(100)]],
       email: ['', [Validators.required, Validators.email]],
-      senha: ['', [Validators.required, Validators.minLength(6), Validators.maxLength(72)]],
+      senha: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(72)]],
       confirmarSenha: ['', [Validators.required]],
     },
     { validators: senhasIguais },

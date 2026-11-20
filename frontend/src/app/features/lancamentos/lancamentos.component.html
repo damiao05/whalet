@@ -1,0 +1,290 @@
+<header class="pagina-topo">
+  <div>
+    <h1>Lançamentos</h1>
+    <div class="navmes">
+      <button type="button" class="btn btn-ghost btn-sm" (click)="mudarMes(-1)" aria-label="Mês anterior">‹</button>
+      <strong class="mes">{{ rotulo() }}</strong>
+      <button type="button" class="btn btn-ghost btn-sm" (click)="mudarMes(1)" aria-label="Próximo mês">›</button>
+      @if (mes() !== mesDeHoje) {
+        <button type="button" class="btn btn-ghost btn-sm" (click)="irParaHoje()">Hoje</button>
+      }
+    </div>
+  </div>
+  <button type="button" class="btn btn-primary" (click)="novo()">Novo lançamento</button>
+</header>
+
+@if (erro()) {
+  <p class="erro">{{ erro() }}</p>
+}
+
+<section class="resumo">
+  <div class="card">
+    <span class="muted">Receitas</span>
+    <strong class="money receita">{{ resumo().receitas | currency: 'BRL' }}</strong>
+    @if (resumo().aReceber > 0) {
+      <small class="muted">+ {{ resumo().aReceber | currency: 'BRL' }} a receber</small>
+    }
+  </div>
+  <div class="card">
+    <span class="muted">Despesas</span>
+    <strong class="money despesa">{{ resumo().despesas | currency: 'BRL' }}</strong>
+    @if (resumo().aPagar > 0) {
+      <small class="muted">+ {{ resumo().aPagar | currency: 'BRL' }} a pagar</small>
+    }
+  </div>
+  <div class="card">
+    <span class="muted">Resultado do mês</span>
+    <strong class="money" [class.despesa]="resumo().resultado < 0">{{ resumo().resultado | currency: 'BRL' }}</strong>
+  </div>
+</section>
+
+<section class="filtros">
+  <div class="segmentos" role="group" aria-label="Filtrar por tipo">
+    @for (f of filtrosTipo; track f.valor) {
+      <button type="button" class="segmento" [class.ativo]="filtroTipo() === f.valor" (click)="filtroTipo.set(f.valor)">
+        {{ f.rotulo }}
+      </button>
+    }
+  </div>
+
+  <select aria-label="Filtrar por conta ou cartão" (change)="filtroOrigem.set($any($event.target).value)">
+    <option value="">Todas as contas e cartões</option>
+    @for (c of contas(); track c.id) {
+      <option [value]="'conta:' + c.id">{{ c.nome }}</option>
+    }
+    @for (k of cartoes(); track k.id) {
+      <option [value]="'cartao:' + k.id">{{ k.nome }} (cartão)</option>
+    }
+  </select>
+
+  <label class="check">
+    <input type="checkbox" [checked]="somentePendentes()" (change)="somentePendentes.set($any($event.target).checked)" />
+    Só pendentes
+  </label>
+</section>
+
+@if (carregando()) {
+  <p class="muted">Carregando...</p>
+} @else if (visiveis().length === 0) {
+  <div class="card">
+    <p>Nenhum lançamento {{ transacoes().length ? 'com esses filtros' : 'neste mês' }}.</p>
+    <button type="button" class="btn btn-primary" (click)="novo()">Novo lançamento</button>
+  </div>
+} @else {
+  <div class="card lista-card">
+    <ul class="lista">
+      @for (t of visiveis(); track t.id) {
+        <li class="linha" [class.pendente]="t.status === 'PENDENTE'">
+          <span class="ponto" [style.background]="corDe(t)"></span>
+
+          <div class="info">
+            <div class="titulo">
+              <strong>{{ t.descricao }}</strong>
+              @if (t.parcelaTotal) {
+                <span class="badge">{{ t.parcelaNumero }}/{{ t.parcelaTotal }}</span>
+              }
+              @if (t.recorrenciaId) {
+                <span class="badge">Recorrente</span>
+              }
+              @if (t.status === 'PENDENTE') {
+                <span class="badge" [class.atrasado]="atrasado(t)">{{ atrasado(t) ? 'Atrasado' : 'Pendente' }}</span>
+              }
+            </div>
+            <div class="sub muted">{{ dataCurta(t.data) }} · {{ detalhe(t) }}</div>
+          </div>
+
+          <span class="valor money" [class.receita]="t.tipo === 'RECEITA'" [class.despesa]="t.tipo === 'DESPESA' || t.tipo === 'PAGAMENTO_FATURA'">
+            @switch (t.tipo) {
+              @case ('RECEITA') { + {{ t.valor | currency: 'BRL' }} }
+              @case ('DESPESA') { − {{ t.valor | currency: 'BRL' }} }
+              @case ('PAGAMENTO_FATURA') { − {{ t.valor | currency: 'BRL' }} }
+              @default { {{ t.valor | currency: 'BRL' }} }
+            }
+          </span>
+
+          <div class="acoes">
+            @if (podeAlterarStatus(t)) {
+              <button type="button" class="btn btn-ghost btn-sm" (click)="alternarStatus(t)">
+                {{ t.status === 'PENDENTE' ? (t.tipo === 'RECEITA' ? 'Recebi' : 'Paguei') : 'Desfazer' }}
+              </button>
+            }
+            @if (t.tipo !== 'PAGAMENTO_FATURA') {
+              <button type="button" class="btn btn-ghost btn-sm" (click)="editar(t)">Editar</button>
+            }
+            <button type="button" class="btn btn-ghost btn-sm btn-perigo" (click)="pedirExclusao(t)">Excluir</button>
+          </div>
+        </li>
+      }
+    </ul>
+  </div>
+}
+
+<!-- ================= Formulário ================= -->
+<dialog #dialog class="modal largo">
+  <form [formGroup]="form" (ngSubmit)="salvar()">
+    <h2>{{ editando() ? 'Editar lançamento' : 'Novo lançamento' }}</h2>
+
+    <div class="segmentos" role="group" aria-label="Tipo">
+      @for (o of tipos; track o.valor) {
+        <button type="button" class="segmento" [class.ativo]="tipo() === o.valor" (click)="mudarTipo(o.valor)">
+          {{ o.rotulo }}
+        </button>
+      }
+    </div>
+
+    @if (!editando()) {
+      <div class="segmentos" role="group" aria-label="Frequência">
+        @for (m of modosDisponiveis(); track m.valor) {
+          <button type="button" class="segmento" [class.ativo]="modo() === m.valor" (click)="mudarModo(m.valor)">
+            {{ m.rotulo }}
+          </button>
+        }
+      </div>
+    }
+
+    <label>
+      Descrição
+      <input type="text" formControlName="descricao" placeholder="Ex.: Mercado, Aluguel, Salário..." />
+    </label>
+    @if (form.controls.descricao.touched && form.controls.descricao.invalid) {
+      <small class="erro">Informe a descrição</small>
+    }
+
+    <label>
+      {{ rotuloValor() }}
+      <app-money-input formControlName="valor" />
+    </label>
+    @if (form.controls.valor.touched && form.controls.valor.invalid) {
+      <small class="erro">O valor deve ser maior que zero</small>
+    }
+
+    <label>
+      {{ modo() === 'PARCELADA' ? 'Data da 1ª parcela' : modo() === 'RECORRENTE' ? 'Primeira ocorrência' : 'Data' }}
+      <input type="date" formControlName="data" />
+    </label>
+
+    <label>
+      {{ tipo() === 'TRANSFERENCIA' ? 'Conta de origem' : tipo() === 'RECEITA' ? 'Conta que recebe' : 'Pago com' }}
+      <select formControlName="origem">
+        <option value="" disabled>Selecione...</option>
+        @if (opcoesOrigem().contas.length) {
+          <optgroup label="Contas">
+            @for (c of opcoesOrigem().contas; track c.id) {
+              <option [value]="'conta:' + c.id">{{ c.nome }}</option>
+            }
+          </optgroup>
+        }
+        @if (opcoesOrigem().cartoes.length) {
+          <optgroup label="Cartões de crédito">
+            @for (k of opcoesOrigem().cartoes; track k.id) {
+              <option [value]="'cartao:' + k.id">{{ k.nome }}</option>
+            }
+          </optgroup>
+        }
+      </select>
+    </label>
+    @if (form.controls.origem.touched && form.controls.origem.invalid) {
+      <small class="erro">Escolha a conta ou o cartão</small>
+    }
+
+    @if (tipo() === 'TRANSFERENCIA') {
+      <label>
+        Conta de destino
+        <select formControlName="destino">
+          <option value="">Selecione...</option>
+          @for (c of opcoesDestino(); track c.id) {
+            <option [value]="c.id">{{ c.nome }}</option>
+          }
+        </select>
+      </label>
+    } @else {
+      <label>
+        Categoria
+        <select formControlName="categoriaId">
+          <option value="">Sem categoria</option>
+          @for (c of categoriasDoTipo(); track c.id) {
+            <option [value]="c.id">{{ c.nome }}</option>
+          }
+        </select>
+      </label>
+    }
+
+    @if (modo() === 'PARCELADA') {
+      <label>
+        Número de parcelas
+        <input type="number" min="2" max="120" formControlName="parcelas" />
+      </label>
+      @if (previaParcela(); as p) {
+        <small class="muted">{{ valores().parcelas }}x de aproximadamente {{ p | currency: 'BRL' }}, uma por mês.</small>
+      }
+    }
+
+    @if (modo() === 'RECORRENTE') {
+      <div class="duas-colunas">
+        <label>
+          Repetir
+          <select formControlName="frequencia">
+            @for (f of frequencias; track f.valor) {
+              <option [value]="f.valor">{{ f.rotulo }}</option>
+            }
+          </select>
+        </label>
+        <label>
+          A cada ({{ unidade() }})
+          <input type="number" min="1" max="12" formControlName="intervalo" />
+        </label>
+      </div>
+      <label>
+        Termina em (opcional)
+        <input type="date" formControlName="dataFim" />
+      </label>
+      <small class="muted">As próximas ocorrências são criadas como pendentes, até 12 meses à frente.</small>
+    }
+
+    @if (!origemEhCartao() && modo() !== 'RECORRENTE') {
+      <label class="check">
+        <input type="checkbox" formControlName="efetivada" />
+        {{ tipo() === 'RECEITA' ? 'Já foi recebido' : tipo() === 'TRANSFERENCIA' ? 'Já foi transferido' : 'Já foi pago' }}
+      </label>
+      @if ((valores().data ?? '') > '' && valores().data! > hojeIsoStr && valores().efetivada) {
+        <small class="muted">A data é futura. Desmarque se ainda não aconteceu.</small>
+      }
+    }
+
+    @if (erroForm()) {
+      <p class="erro">{{ erroForm() }}</p>
+    }
+
+    <div class="modal-acoes">
+      <button type="button" class="btn btn-ghost" (click)="fechar()">Cancelar</button>
+      <button type="submit" class="btn btn-primary" [disabled]="salvando()">
+        {{ salvando() ? 'Salvando...' : 'Salvar' }}
+      </button>
+    </div>
+  </form>
+</dialog>
+
+<!-- ================= Exclusão ================= -->
+<dialog #dlgExcluir class="modal">
+  @if (excluindo(); as t) {
+    <h2>Excluir lançamento</h2>
+    <p>
+      <strong>{{ t.descricao }}</strong><br />
+      <span class="muted">{{ t.valor | currency: 'BRL' }} em {{ dataCurta(t.data) }}</span>
+    </p>
+    <div class="modal-acoes coluna">
+      <button type="button" class="btn btn-ghost btn-perigo" (click)="excluir('ESTA')">Excluir só este lançamento</button>
+      @if (t.grupoParcelasId) {
+        <button type="button" class="btn btn-ghost btn-perigo" (click)="excluir('PARCELAS')">
+          Excluir todas as {{ t.parcelaTotal }} parcelas
+        </button>
+      }
+      @if (t.recorrenciaId) {
+        <button type="button" class="btn btn-ghost btn-perigo" (click)="excluir('RECORRENCIA')">
+          Encerrar a recorrência (apaga as futuras pendentes)
+        </button>
+      }
+      <button type="button" class="btn btn-ghost" (click)="fecharExclusao()">Cancelar</button>
+    </div>
+  }
+</dialog>

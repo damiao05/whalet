@@ -6,6 +6,7 @@ import controle.financeiro.dtos.LoginRequestDTO;
 import controle.financeiro.dtos.RegistroRequestDTO;
 import controle.financeiro.models.Usuario;
 import controle.financeiro.repositories.UsuarioRepository;
+import controle.financeiro.services.CategoriaService;
 import controle.financeiro.services.GoogleTokenVerifier;
 import controle.financeiro.services.JwtService;
 import jakarta.validation.Valid;
@@ -27,6 +28,7 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final GoogleTokenVerifier googleTokenVerifier;
+    private final CategoriaService categoriaService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequestDTO dto) {
@@ -68,7 +70,9 @@ public class AuthController {
                 novo.setSobrenome(sobrenome != null ? sobrenome : "");
                 novo.setAuth_provider("GOOGLE");
                 novo.setProvider_id(googleId);
-                return usuarioRepository.save(novo);
+                Usuario salvo = usuarioRepository.save(novo);
+                categoriaService.criarPadroes(salvo);
+                return salvo;
             });
 
             String token = jwtService.gerarToken(usuario.getEmail());
@@ -97,6 +101,8 @@ public class AuthController {
         } catch (DataIntegrityViolationException e) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("E-mail já cadastrado");
         }
+
+        categoriaService.criarPadroes(usuario);
 
         String token = jwtService.gerarToken(usuario.getEmail());
         return ResponseEntity.status(HttpStatus.CREATED).body(new AuthResponseDTO(

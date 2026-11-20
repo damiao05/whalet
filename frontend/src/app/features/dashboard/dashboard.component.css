@@ -1,0 +1,30 @@
+.rotulo { margin: 0; text-transform: capitalize; }
+.resumo { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+.resumo .card { display: flex; flex-direction: column; gap: .25rem; }
+.resumo strong { font-size: 1.4rem; }
+.destaque { border-top: 4px solid var(--primary); }
+.receita { color: var(--success); }
+.despesa { color: var(--danger); }
+
+.colunas { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1rem; align-items: start; margin-bottom: 1rem; }
+h2 { font-size: 1.1rem; margin: 0 0 .75rem; }
+
+.lista { list-style: none; margin: 0 0 .5rem; padding: 0; }
+.item {
+  display: grid; grid-template-columns: 4.5rem 1fr auto; align-items: center; gap: .75rem;
+  padding: .6rem 0; border-bottom: 1px solid var(--border); color: inherit; text-decoration: none;
+}
+li:last-child .item { border-bottom: 0; }
+.item:hover .texto strong { color: var(--primary); }
+.data { font-size: .85rem; color: var(--text-muted); font-weight: 600; }
+.data.atrasado { color: var(--danger); }
+.texto { display: flex; flex-direction: column; min-width: 0; }
+
+.gasto { padding: .45rem 0; }
+.gasto-topo { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: .3rem; font-size: .95rem; }
+.gasto-topo a { color: inherit; text-decoration: none; font-weight: 600; }
+.gasto-topo a:hover { color: var(--primary); }
+.ponto { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: .5rem; }
+.barra { height: 8px; border-radius: 999px; background: var(--surface-2); overflow: hidden; border: 1px solid var(--border); }
+.barra span { display: block; height: 100%; border-radius: 999px; background: var(--primary); }
+.barra span.cheio { background: var(--danger); }

@@ -1,0 +1,26 @@
+<div class="campo">
+  <span class="prefixo" aria-hidden="true">R$</span>
+  <input
+    #campo
+    type="text"
+    inputmode="numeric"
+    autocomplete="off"
+    [value]="texto()"
+    [disabled]="desabilitado()"
+    (input)="aoDigitar($event)"
+    (focus)="fim($event)"
+    (click)="fim($event)"
+    (blur)="onTouched()"
+  />
+  @if (permitirNegativo()) {
+    <button
+      type="button"
+      class="sinal"
+      [class.ativo]="negativo()"
+      [attr.aria-pressed]="negativo()"
+      [disabled]="desabilitado()"
+      (click)="alternarSinal()"
+      aria-label="Alternar entre positivo e negativo"
+    >±</button>
+  }
+</div>
