@@ -3,7 +3,7 @@ FROM maven:3.9-eclipse-temurin-21 AS build
 WORKDIR /app
 COPY pom.xml .
 RUN mvn -B -q dependency:go-offline
-COPY ../../../whalet-etapa-final/backend/src ./src
+COPY ../../../whalet/backend/src ./src
 RUN mvn -B -q package -DskipTests
 
 # ---------- execução ----------
