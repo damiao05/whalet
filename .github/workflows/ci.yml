@@ -9,6 +9,28 @@ on:
 jobs:
   backend:
     runs-on: ubuntu-latest
+    # Banco PostgreSQL descartável: o teste aplica TODAS as migrations do zero e o Hibernate confere as entidades.
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: whalet
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DB_URL: jdbc:postgresql://localhost:5432/whalet
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      # Chave descartável, só para a CI (não é a de produção)
+      JWT_SECRET: Y2ktb25seS1kdW1teS1zZWNyZXQta2V5LTAxMjM0NTY3ODlhYg==
+      GOOGLE_CLIENT_ID: ci-dummy-client-id
+      CORS_ORIGINS: http://localhost:4200
     defaults:
       run:
         working-directory: backend
@@ -19,7 +41,7 @@ jobs:
           distribution: temurin
           java-version: '21'
           cache: maven
-      - run: mvn -B package -DskipTests
+      - run: mvn -B verify
 
   frontend:
     runs-on: ubuntu-latest

@@ -1,0 +1,109 @@
+<header class="pagina-topo">
+  <div>
+    <h1>Início</h1>
+    <p class="muted rotulo">{{ rotulo }}</p>
+  </div>
+  <a routerLink="/lancamentos" class="btn btn-primary">Novo lançamento</a>
+</header>
+
+@if (erro()) {
+  <p class="erro">{{ erro() }}</p>
+}
+
+@if (carregando()) {
+  <p class="muted">Carregando...</p>
+} @else {
+  <section class="resumo">
+    <div class="card destaque">
+      <span class="muted">Saldo nas contas</span>
+      <strong class="money" [class.despesa]="saldoTotal() < 0">{{ saldoTotal() | currency: 'BRL' }}</strong>
+      <small class="muted">{{ contas().length }} conta(s)</small>
+    </div>
+    <div class="card">
+      <span class="muted">Resultado do mês</span>
+      <strong class="money" [class.despesa]="resumo().resultado < 0" [class.receita]="resumo().resultado > 0">
+        {{ resumo().resultado | currency: 'BRL' }}
+      </strong>
+      <small class="muted">
+        {{ resumo().receitas | currency: 'BRL' }} recebidos · {{ resumo().despesas | currency: 'BRL' }} gastos
+      </small>
+    </div>
+    <div class="card">
+      <span class="muted">A pagar / a receber no mês</span>
+      <strong class="money">{{ resumo().aPagar | currency: 'BRL' }}</strong>
+      <small class="muted">{{ resumo().aReceber | currency: 'BRL' }} a receber</small>
+    </div>
+    <div class="card">
+      <span class="muted">Limite disponível nos cartões</span>
+      <strong class="money">{{ limiteDisponivel() | currency: 'BRL' }}</strong>
+      <small class="muted">{{ cartoes().length }} cartão(ões)</small>
+    </div>
+  </section>
+
+  <div class="colunas">
+    <section class="card">
+      <h2>Vence nos próximos {{ janela }} dias</h2>
+      @if (vencimentos().length === 0) {
+        <p class="muted">Nada pendente por enquanto.</p>
+      } @else {
+        <ul class="lista">
+          @for (v of vencimentos(); track v.chave) {
+            <li>
+              <a [routerLink]="v.link" class="item">
+                <span class="data" [class.atrasado]="v.atrasado">{{ v.atrasado ? 'Atrasado' : dataCurta(v.data) }}</span>
+                <span class="texto">
+                  <strong>{{ v.titulo }}</strong>
+                  <small class="muted">{{ v.detalhe }}{{ v.atrasado ? ' · venceu em ' + dataCurta(v.data) : '' }}</small>
+                </span>
+                <span class="money" [class.receita]="v.sinal === 1" [class.despesa]="v.sinal === -1">
+                  {{ v.valor | currency: 'BRL' }}
+                </span>
+              </a>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    <section class="card">
+      <h2>Gastos por categoria</h2>
+      @if (gastos().length === 0) {
+        <p class="muted">Nenhuma despesa neste mês.</p>
+      } @else {
+        <ul class="lista">
+          @for (g of gastos(); track g.nome) {
+            <li class="gasto">
+              <div class="gasto-topo">
+                <span><span class="ponto" [style.background]="g.cor"></span>{{ g.nome }}</span>
+                <span class="money">{{ g.total | currency: 'BRL' }}</span>
+              </div>
+              <div class="barra" role="img" [attr.aria-label]="g.nome + ': ' + g.percentual.toFixed(0) + '%'">
+                <span [style.width.%]="g.percentual" [style.background]="g.cor"></span>
+              </div>
+            </li>
+          }
+        </ul>
+        <small class="muted">Inclui despesas pendentes e compras no cartão, pela data da compra.</small>
+      }
+    </section>
+  </div>
+
+  @if (cartoes().length > 0) {
+    <section class="card cartoes">
+      <h2>Cartões</h2>
+      <ul class="lista">
+        @for (c of cartoes(); track c.id) {
+          <li class="gasto">
+            <div class="gasto-topo">
+              <a [routerLink]="['/cartoes', c.id, 'faturas']">{{ c.nome }}</a>
+              <span class="money">{{ c.limiteDisponivel | currency: 'BRL' }} <small class="muted">disponível</small></span>
+            </div>
+            <div class="barra" role="img" [attr.aria-label]="'Limite usado: ' + percentualLimite(c).toFixed(0) + '%'">
+              <span [style.width.%]="percentualLimite(c)" [class.cheio]="percentualLimite(c) >= 85"></span>
+            </div>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+}

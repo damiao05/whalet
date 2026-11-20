@@ -1,4 +1,5 @@
 import { CurrencyPipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { Component, ElementRef, OnInit, computed, inject, signal, viewChild } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { forkJoin } from 'rxjs';
@@ -12,7 +13,7 @@ import { MoneyInputComponent } from '../../shared/money-input/money-input.compon
 
 @Component({
   selector: 'app-cartoes',
-  imports: [ReactiveFormsModule, CurrencyPipe, AvatarComponent, MoneyInputComponent],
+  imports: [ReactiveFormsModule, CurrencyPipe, AvatarComponent, MoneyInputComponent, RouterLink],
   templateUrl: './cartoes.component.html',
   styleUrl: './cartoes.component.css',
 })
@@ -162,6 +163,10 @@ export class CartoesComponent implements OnInit {
 
   fechar(): void {
     this.dialog().nativeElement.close();
+  }
+
+  percentualLimite(c: Cartao): number {
+    return c.limite > 0 ? Math.min(100, (c.limiteUsado / c.limite) * 100) : 0;
   }
 
   private abrir(): void {

@@ -1,5 +1,5 @@
 <main class="login">
-    <h1>Controle Financeiro</h1>
+    <h1>Whalet - Controle Financeiro</h1>
     <p class="sub">Entre para acessar suas finanças</p>
 
     <form [formGroup]="form" (ngSubmit)="entrar()">
@@ -16,7 +16,7 @@
             <input type="password" formControlName="senha" autocomplete="current-password">
         </label>
         @if (form.controls.senha.touched && form.controls.senha.invalid) {
-            <small class="erro">A senha deve ter ao menos 6 caracteres</small>
+            <small class="erro">A senha deve ter ao menos 8 caracteres</small>
         }
 
         @if (erro()) {
@@ -26,6 +26,9 @@
         <button type="submit" [disabled]="carregando()">
             {{ carregando() ? 'Entrando...' : 'Entrar' }}
         </button>
+        @if (demorando()) {
+            <p class="muted">Acordando o servidor. No primeiro acesso do dia isso pode levar cerca de um minuto.</p>
+        }
     </form>
 
     <div class="divisor"><span>ou</span></div>
@@ -37,4 +40,5 @@
     />
 
     <p class="troca">Não tem conta? <a routerLink="/registro">Cadastre-se</a></p>
+    <p class="troca"><a routerLink="/privacidade">Política de privacidade</a></p>
 </main>

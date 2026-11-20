@@ -1,0 +1,6 @@
+target/
+.idea/
+*.iml
+.git/
+# configuração local com segredos: nunca entra na imagem
+config/

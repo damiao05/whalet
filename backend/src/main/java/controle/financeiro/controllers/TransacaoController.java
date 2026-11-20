@@ -10,7 +10,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,7 +27,7 @@ public class TransacaoController {
     @GetMapping
     public List<TransacaoResponseDTO> listar(
             @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM") YearMonth mes) {
-        return service.listar(mes != null ? mes : YearMonth.now());
+        return service.listar(mes != null ? mes : YearMonth.now(ZoneId.of("America/Sao_Paulo")));
     }
 
     /** Retorna uma lista: 1 item, ou N se foi parcelado. */
@@ -52,4 +54,11 @@ public class TransacaoController {
     public void excluir(@PathVariable UUID id, @RequestParam(defaultValue = "false") boolean todasParcelas) {
         service.excluir(id, todasParcelas);
     }
+
+    @GetMapping("/pendentes")
+    public List<TransacaoResponseDTO> pendentes(
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate ate) {
+        return service.pendentes(ate);
+    }
+
 }

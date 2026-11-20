@@ -1,0 +1,32 @@
+name: Backup do banco
+
+on:
+  schedule:
+    - cron: '0 6 * * 0'   # todo domingo, 06:00 UTC
+  workflow_dispatch:       # também pode ser disparado à mão
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Instalar o cliente do PostgreSQL (mesma versão do Neon)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-common
+          sudo /usr/share/postgresql-common/pgdg/apt.postgresql.org.sh -y
+          sudo apt-get install -y postgresql-client-17   # ajuste para a versão do seu projeto no Neon
+
+      - name: Dump criptografado
+        env:
+          BACKUP_DATABASE_URL: ${{ secrets.BACKUP_DATABASE_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          pg_dump "$BACKUP_DATABASE_URL" --no-owner --format=custom \
+            | gpg --batch --yes --pinentry-mode loopback --passphrase "$BACKUP_PASSPHRASE" \
+                  --symmetric --cipher-algo AES256 -o "whalet-$(date +%F).dump.gpg"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: backup-banco
+          path: whalet-*.dump.gpg
+          retention-days: 90

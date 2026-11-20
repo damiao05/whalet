@@ -1,0 +1,151 @@
+<a routerLink="/cartoes" class="voltar">‹ Cartões</a>
+
+@if (cartao(); as c) {
+    <header class="pagina-topo">
+        <div class="identidade">
+            <app-avatar [nome]="c.nome" [cor]="c.cor" [tamanho]="48" />
+            <div>
+                <h1>{{ c.nome }}</h1>
+                <p class="muted">Fecha dia {{ c.diaFechamento }} · vence dia {{ c.diaVencimento }}</p>
+            </div>
+        </div>
+    </header>
+}
+
+@if (erro()) {
+    <p class="erro">{{ erro() }}</p>
+}
+
+@if (fatura(); as f) {
+    <div class="navmes">
+    <button type="button" class="btn btn-ghost btn-sm" (click)="mudarMes(-1)" aria-label="Fatura anterior">‹</button>
+    <div class="mes">
+      <small class="muted">Fatura com vencimento em</small>
+      <strong>{{ rotuloMes(f.mes) }}</strong>
+    </div>
+    <button type="button" class="btn btn-ghost btn-sm" (click)="mudarMes(1)" aria-label="Próxima fatura">›</button>
+    <span class="situacao" [attr.data-status]="f.status">{{ rotuloStatus[f.status] }}</span>
+  </div>
+
+  <section class="resumo">
+    <div class="card">
+      <span class="muted">Total da fatura</span>
+      <strong class="money">{{ f.total | currency: 'BRL' }}</strong>
+      <small class="muted">Compras de {{ dataCurta(f.dataInicio) }} a {{ dataCurta(f.dataFechamento) }}</small>
+    </div>
+    <div class="card">
+      <span class="muted">Pago</span>
+      <strong class="money receita">{{ f.pago | currency: 'BRL' }}</strong>
+    </div>
+    <div class="card">
+      <span class="muted">Em aberto</span>
+      <strong class="money" [class.despesa]="f.emAberto > 0">{{ f.emAberto | currency: 'BRL' }}</strong>
+      <small class="muted">Vence em {{ dataCurta(f.dataVencimento) }}</small>
+    </div>
+  </section>
+
+  <div class="acoes-topo">
+    <button type="button" class="btn btn-primary" (click)="abrirPagamento()" [disabled]="contas().length === 0">
+      Pagar fatura
+    </button>
+    @if (f.emAberto < 0) {
+      <small class="muted">Pago a mais: {{ -f.emAberto | currency: 'BRL' }}</small>
+    }
+  </div>
+
+  <h2 class="titulo-secao">Compras</h2>
+  @if (f.compras.length === 0) {
+    <div class="card"><p class="muted">Nenhuma compra nesta fatura.</p></div>
+  } @else {
+    <div class="card lista-card">
+      <ul class="lista">
+        @for (t of f.compras; track t.id) {
+          <li class="linha">
+            <span class="data muted">{{ dataCurta(t.data) }}</span>
+            <span class="desc">
+              {{ t.descricao }}
+              @if (t.parcelaTotal) {
+                <span class="badge">{{ t.parcelaNumero }}/{{ t.parcelaTotal }}</span>
+              }
+              @if (t.status === 'PENDENTE') {
+                <span class="badge">Previsto</span>
+              }
+            </span>
+            <span class="money">{{ t.valor | currency: 'BRL' }}</span>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+
+  @if (f.pagamentos.length > 0) {
+    <h2 class="titulo-secao">Pagamentos</h2>
+    <div class="card lista-card">
+      <ul class="lista">
+        @for (p of f.pagamentos; track p.id) {
+          <li class="linha">
+            <span class="data muted">{{ dataCurta(p.data) }}</span>
+            <span class="desc">
+              Pago com {{ nomeConta(p.contaId) }}
+              @if (p.status === 'PENDENTE') {
+                <span class="badge">Agendado</span>
+              }
+            </span>
+            <span class="money receita">{{ p.valor | currency: 'BRL' }}</span>
+            <button type="button" class="btn btn-ghost btn-sm btn-perigo" (click)="desfazerPagamento(p)">Desfazer</button>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+} @else if (carregando()) {
+  <p class="muted">Carregando...</p>
+}
+
+<dialog #dialog class="modal">
+  <form [formGroup]="form" (ngSubmit)="pagar()">
+    <h2>Pagar fatura</h2>
+
+    <label>
+      Pagar com a conta
+      <select formControlName="contaId">
+        <option value="" disabled>Selecione...</option>
+        @for (c of contas(); track c.id) {
+          <option [value]="c.id">{{ c.nome }}</option>
+        }
+      </select>
+    </label>
+    @if (form.controls.contaId.touched && form.controls.contaId.invalid) {
+      <small class="erro">Escolha a conta</small>
+    }
+
+    <label>
+      Valor
+      <app-money-input formControlName="valor" />
+    </label>
+    @if (form.controls.valor.touched && form.controls.valor.invalid) {
+      <small class="erro">O valor deve ser maior que zero</small>
+    }
+
+    <label>
+      Data do pagamento
+      <input type="date" formControlName="data" />
+    </label>
+
+    <label class="check">
+      <input type="checkbox" formControlName="efetivada" />
+      Já foi pago
+    </label>
+
+    @if (erroForm()) {
+      <p class="erro">{{ erroForm() }}</p>
+    }
+
+    <div class="modal-acoes">
+      <button type="button" class="btn btn-ghost" (click)="fechar()">Cancelar</button>
+      <button type="submit" class="btn btn-primary" [disabled]="salvando()">
+        {{ salvando() ? 'Registrando...' : 'Registrar pagamento' }}
+      </button>
+    </div>
+  </form>
+</dialog>

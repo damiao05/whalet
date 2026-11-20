@@ -121,6 +121,12 @@ public class TransacaoService {
         }
     }
 
+    @Transactional(readOnly = true)
+    public List<TransacaoResponseDTO> pendentes(LocalDate ate) {
+        UUID usuarioId = usuarioLogado.obter().getId();
+        return repository.pendentesAte(usuarioId, ate).stream().map(TransacaoResponseDTO::de).toList();
+    }
+
     // ----------------------------------------------------------------------------------
 
     private Transacao buscar(UUID id) {
